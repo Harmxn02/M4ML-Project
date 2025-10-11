@@ -1,0 +1,19 @@
+# Ignore everything
+*
+
+# But not these file types
+!*.tex
+!*.bib
+!*.pdf
+
+# Also ensure Git can traverse directories
+!*/
+
+
+# Don't these files specifically
+!README.md
+!.gitignore
+
+# and just stuff I prefer to keep track of
+!*.png
+!*.md
