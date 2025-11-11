@@ -16,27 +16,114 @@
 
 \section{Introduction}
 
-Text\ldots
+\textbf{Purpose:} Introduce the motivation and general context of the topic.
+
+\textbf{Content:}
+
+\begin{itemize}
+	\item Machine learning relies heavily on mathematics to model, analyse, and interpret data.
+	\item High-dimensional datasets are common in modern applications, making dimensionality reduction a crucial step for improving performance and interpretability.
+	\item Principal Component Analysis (PCA) is one of the most widely used techniques for this purpose.
+	\item The report focuses on the mathematical foundations of PCA, particularly the role of eigenvalues and eigenvectors in identifying directions of maximum variance.
+	\item The aim is to connect theoretical concepts from linear algebra to their practical use in machine learning.
+\end{itemize}
+
 
 \pagebreak
 \section{Preliminaries}
 
-Text\ldots
+\textbf{Purpose:} Provide the mathematical background required to understand PCA
+
+\textbf{Content:}
+
+\begin{itemize}
+	\item Review of key linear algebra concepts relevant to PCA\@:
+	\begin{itemize}
+		\item A square matrix \(A\) acting on a vector \(\mathbf{v}\) satisfies the eigenvalue equation \(A\mathbf{v} = \lambda\mathbf{v}\), where \(\lambda\) is an eigenvalue and \(\mathbf{v}\) is the corresponding eigenvector.
+		\item Geometrically, eigenvectors indicate directions that remain unchanged under the transformation \(A\), and eigenvalues represent the scaling factor along those directions.
+	\end{itemize}
+	\item Definition of the covariance matrix as a measure of how variables in a dataset vary together:
+	\[
+	\Sigma = \frac{1}{n-1}{(X - \bar{X})}^T(X - \bar{X})
+	\]
+	where \(X\) is the data matrix and \(\bar{X}\) is the mean vector.
+	\item PCA involves the eigen-decomposition of this covariance matrix to determine the principal components.
+	\item These eigenvectors form a new orthogonal basis for the data space, ordered by decreasing eigenvalues corresponding to decreasing variance captured.
+\end{itemize}
+
 
 
 \section{Methods}
 
-Text\ldots
+\textbf{Purpose:} Explain how PCA works step-by-step, highlighting the role of eigenvalues and eigenvectors.
+
+\textbf{Content:}
+
+\begin{itemize}
+	\item Describe the goal of PCA (to reduce dimensionality while retaining as much information (variance) as possible)
+	\item Outline the PCA algorithm briefly:
+	\begin{enumerate}
+		\item Standardise the dataset (zero mean, unit variance).
+		\item Compute the covariance matrix of the data.
+		\item Perform eigen-decomposition of the covariance matrix.
+		\item Sort eigenvalues (descending) and select the top \(k\) eigenvectors (principal components).
+		\item Project data onto the new subspace.
+	\end{enumerate}
+	\item Explain the mathematical interpretation:
+	\begin{itemize}
+		\item Eigenvectors represent directions of maximum variance.
+		\item Eigenvalues indicate how much variance is captured along each direction.
+	\end{itemize}
+	\item Optionally, relate this to Singular Value Decomposition (SVD), which can also be used for PCA
+\end{itemize}
+
 
 \section{Numerical Examples}
 
-Text\ldots
+\textbf{Purpose:} Provide a small illustrative example to demonstrate PCA in practice.
+
+\textbf{Content:}
+
+\begin{itemize}
+	\item Use a simple 2D or 3D dataset (e.g., two correlated variables like height and weight).
+	\item Show (conceptually, not full code) how to:
+	\begin{enumerate}
+		\item Compute the covariance matrix.
+		\item Find its eigenvalues and eigenvectors.
+		\item Project data onto the first principal component.
+	\end{enumerate}
+	\item Briefly interpret results:
+	\begin{itemize}
+		\item First principal component captures most of the variance.
+		\item Dimensionality reduced from 2D to 1D (example result).
+	\end{itemize}
+	\item You could include a small diagram or table if allowed.
+\end{itemize}
+
+
 
 \section{Collaboration}
 
-Text\ldots
+\textbf{Purpose:} Explain how the group collaborated and divided tasks.
+
+\textbf{Content:}
+
+\begin{itemize}
+	\item Describe who worked on what:
+	\begin{itemize}
+		\item Tobias handled \ldots
+		\item Harman handled \ldots
+	\end{itemize}
+	\item Mention the communication method (e.g., shared documents, group meetings, GitHub, etc.).
+	\item Reflect briefly on teamwork effectiveness.
+\end{itemize}
+
 
 \section{Reflection}
+
+\textbf{Purpose:} Personal reflections on the learning experience.
+
+\textbf{Content for Each Subsection:}
 
 \subsection{Student a: Tobias Hungwe}
 
@@ -44,6 +131,10 @@ Text\ldots
 
 \subsection{Student b: Harman Singh}
 
-Text\ldots
+\begin{itemize}
+	\item Reflect on the practical side: implementing PCA, interpreting eigenvalues, and visualising results.
+	\item Mention insights on how mathematics enables dimensionality reduction and data interpretation.
+	\item Optionally note any challenges, e.g., understanding covariance or eigen-decomposition intuitively
+\end{itemize}
 
 \end{document}
