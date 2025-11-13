@@ -224,9 +224,9 @@ So the eigenvectors corresponding to the eigenvalues \(\lambda_1 = 4\) and \(\la
 Previously we explained that PCA transforms data into a new set of variables, the principal components, which are uncorrelated and ordered by the amount of variance they capture from the original data.
 To find these principal components, PCA uses the eigen-decomposition of the covariance matrix (a measure of how variables in a dataset vary together). 
 
-The covariance matrix \(\Sigma\) is defined as:
+The covariance matrix $S$ is defined as:
 \[
-	\Sigma = \frac{1}{n-1}{(X - \bar{X})}^T(X - \bar{X})
+	S = \frac{1}{n-1}{(X - \bar{X})}^T(X - \bar{X})
 \]
 where \(X\) is the data matrix and \(\bar{X}\) is the mean vector.
 
@@ -275,6 +275,39 @@ where \(X\) is the data matrix and \(\bar{X}\) is the mean vector.
 % 	\end{itemize}
 % 	\item Optionally, relate this to Singular Value Decomposition (SVD), which can also be used for PCA
 % \end{itemize}
+
+\subsection{The PCA algorithm}
+
+
+\subsubsection{Standardise the dataset}
+
+Subtract the mean and scale by the standard deviation for each feature to make sure that each feature contributes equally. For this we use the z-score transformation formula, but adapted for each feature \(j\):
+
+\[z_{ij} = \frac{x_{ij}-\mu_{j}}{\sigma_{j}}\]
+
+with $\mu_{j}$ being the mean of feature \(j\) and $\sigma_{j}$ being the standard deviation of feature \(j\).
+
+
+
+\subsubsection{Calculate the covariance matrix}
+The covariance matrix \(S\) is calculated as:
+\[S = \frac{1}{n-1} {Z}^T Z\]
+
+with \(Z\) being the standardised data matrix.
+
+
+\subsubsection{Perform eigen-decomposition on the covariance matrix}
+We perform eigen-decomposition on the covariance matrix \(S\):
+\[S = V \Lambda V^{-1}\]
+with \(V\) being the matrix of eigenvectors and \(\Lambda\) is the diagonal matrix of eigenvalues.
+
+
+\subsubsection{Sort eigenvalues and select top \(k\) eigenvectors}
+\[ \boxed{ \lambda_1 \geq \lambda_2} \geq \lambda_3 \geq \cdots \geq \lambda_p\]
+
+PCA is not a lossless algorithm, meaning that we do lose some information when we reduce the dimensionality of the data. However, by selecting the top \(k\) eigenvectors (principal components), we retain the directions that capture the most variance in the data, and this usually gives a pretty good approximation of the original data.
+
+
 
 
 \section{Numerical Examples}
