@@ -1,23 +1,5 @@
-\documentclass[11pt, a4paper]{article}
-\usepackage{geometry}
-\usepackage[parfill]{parskip}
-\usepackage{graphicx}
-\usepackage{amsmath}
-\usepackage{enumerate}
-
-\usepackage{url}
-
-\title{Project ``Topic: Eigenvalues and Eigenvectors in Principal Component Analysis'' \\
-	{Title} \\ 
-	IB3702 Mathematics for Machine Learning}
-\author{Harman Singh}
-\date{15 November, 2025}
-
-\begin{document}
 % chktex-file 44
-\maketitle
-
-\section{Introduction}
+\subsection{Introduction}
 
 % \textbf{Purpose:} Introduce the motivation and general context of the topic.
 
@@ -39,14 +21,14 @@ The aim of this report is to explore a new field of mathematics and gain knowled
 
 
 
-\pagebreak
-\tableofcontents
+% \pagebreak
+% \tableofcontents
 
 
 \pagebreak
-\section{Preliminaries}
+\subsection{Preliminaries}
 
-\subsection{Vectors}
+\subsubsection{Vectors}
 
 You can visualise a column in a dataset as a vector in a high-dimensional space. Each row in the dataset corresponds to a component of the vector, so a dataset with \(n\) observations can be represented as a vector in an \(n\)-dimensional space.
 
@@ -76,7 +58,7 @@ You can visualise a column in a dataset as a vector in a high-dimensional space.
 Here, the columns \texttt{x} and \texttt{y} from the dataset are represented as vectors \(\mathbf{v_x}\) and \(\mathbf{v_y}\) in a 3-dimensional space.
 
 
-\subsection{Linear transformations}
+\subsubsection{Linear transformations}
 
 A linear transformation takes a vector as input and produces another vector as output, while maintaining the structure of the vector space.
 For example, a linear transformation is represented by a matrix \(A\):
@@ -99,7 +81,7 @@ When this matrix transforms the vector \(\mathbf{v} = \begin{bmatrix}1 \\ 1\end{
 
 This transformation scales the first component of the vector by 2 and the second component by 3.
 
-\subsection{Eigenvectors and Eigenvalues}
+\subsubsection{Eigenvectors and Eigenvalues}
 
 An eigenvector is a special type of vector where, when a linear transformation is applied to it, only the scale of the vector changes but not its direction. The eigenvalue is the factor by which the eigenvector scaled.
 
@@ -160,18 +142,18 @@ If we calculate \(Av\) and \(Aw\) we can confirm that the vector \(v\) was simpl
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.5\textwidth]{images/eigenvector-visualisation.png}
+	\includegraphics[width=0.5\textwidth]{images/LINEAR_ALGEBRA/eigenvector-visualisation.png}
 	\caption{Visualization of eigenvectors and eigenvalues under a linear transformation~\cite{Libretexts_2023}.}
 \end{figure}
 
-\subsection{Eigen-decomposition}
+\subsubsection{Eigen-decomposition}
 Eigen-decomposition is a method used to break down a square matrix into its eigenvalues and eigenvectors. For a square matrix \(A\), the eigen-decomposition can be expressed as:
 \[
 	A = V \Lambda V^{-1}
 \]
 where \(V\) is a matrix whose columns are the eigenvectors of \(A\), and \(\Lambda\) is a diagonal matrix containing the corresponding eigenvalues.
 
-We take the example matrix \(A\) from the previous section:
+We take the example matrix \(A\) from the previous subsection:
 \[
 	A = \begin{bmatrix}
 		2 & 2 \\
@@ -219,7 +201,7 @@ So the eigenvectors corresponding to the eigenvalues \(\lambda_1 = 4\) and \(\la
 	\end{bmatrix}
 \]
 
-\subsection{Covariance matrix}
+\subsubsection{Covariance matrix}
 
 Previously we explained that PCA transforms data into a new set of variables, the principal components, which are uncorrelated and ordered by the amount of variance they capture from the original data.
 To find these principal components, PCA uses the eigen-decomposition of the covariance matrix (a measure of how variables in a dataset vary together). 
@@ -252,7 +234,7 @@ where \(X\) is the data matrix and \(\bar{X}\) is the mean vector.
 
 
 
-\section{Methods}
+\subsection{Methods}
 
 % \textbf{Purpose:} Explain how PCA works step-by-step, highlighting the role of eigenvalues and eigenvectors.
 
@@ -276,10 +258,10 @@ where \(X\) is the data matrix and \(\bar{X}\) is the mean vector.
 % 	\item Optionally, relate this to Singular Value Decomposition (SVD), which can also be used for PCA
 % \end{itemize}
 
-\subsection{The PCA algorithm}
+\subsubsection{The PCA algorithm}
 
 
-\subsubsection{Standardise the dataset}
+\textbf{1. Standardise the dataset}
 
 Subtract the mean and scale by the standard deviation for each feature to make sure that each feature contributes equally. For this we use the z-score transformation formula, but adapted for each feature \(j\):
 
@@ -289,20 +271,20 @@ with $\mu_{j}$ being the mean of feature \(j\) and $\sigma_{j}$ being the standa
 
 
 
-\subsubsection{Calculate the covariance matrix}
+\textbf{2. Calculate the covariance matrix}
 The covariance matrix \(S\) is calculated as:
 \[S = \frac{1}{n-1} {Z}^T Z\]
 
 with \(Z\) being the standardised data matrix.
 
 
-\subsubsection{Perform eigen-decomposition on the covariance matrix}
+\textbf{3. Perform eigen-decomposition on the covariance matrix}
 We perform eigen-decomposition on the covariance matrix \(S\):
 \[S = V \Lambda V^{-1}\]
 with \(V\) being the matrix of eigenvectors and \(\Lambda\) is the diagonal matrix of eigenvalues.
 
 
-\subsubsection{Sort eigenvalues and select top \(k\) eigenvectors}
+\textbf{4. Sort eigenvalues and select top \(k\) eigenvectors}
 \[ \boxed{ \lambda_1 \geq \lambda_2} \geq \lambda_3 \geq \cdots \geq \lambda_p\]
 
 PCA is not a lossless algorithm, meaning that we do lose some information when we reduce the dimensionality of the data. However, by selecting the top \(k\) eigenvectors (principal components), we retain the directions that capture the most variance in the data, and this usually gives a pretty good approximation of the original data.
@@ -310,7 +292,7 @@ PCA is not a lossless algorithm, meaning that we do lose some information when w
 
 
 
-\section{Numerical Examples}
+\subsection{Numerical Examples}
 
 % \textbf{Purpose:} Provide a small illustrative example to demonstrate PCA in practice.
 
@@ -332,11 +314,5 @@ PCA is not a lossless algorithm, meaning that we do lose some information when w
 % 	\item You could include a small diagram or table if allowed.
 % \end{itemize}
 
-
-
-
-
 \pagebreak
-\bibliographystyle{plain}
-\bibliography{../references}
-\end{document}
+\bibliography{references}
