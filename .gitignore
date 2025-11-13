@@ -13,6 +13,14 @@
 # Don't these files specifically
 !README.md
 !.gitignore
+!readme-tobias.txt
+
+
+
+
+# TODO: AT THE VERY END, BEFORE SUBMISSION, REMOVE THIS
+project-TobiasHungweHarmanSingh-EN.pdf
+
 
 # and just stuff I prefer to keep track of
 !*.png
