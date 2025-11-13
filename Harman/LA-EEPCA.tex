@@ -14,11 +14,10 @@
 \date{15 November, 2025}
 
 \begin{document}
+% chktex-file 44
 \maketitle
 
 \section{Introduction}
-
-% r\cite{jolliffe2002pca}
 
 % \textbf{Purpose:} Introduce the motivation and general context of the topic.
 
@@ -38,8 +37,199 @@ One technique to interpret data, and the topic of this report, is `Principal Com
 
 The aim of this report is to explore a new field of mathematics and gain knowledge in it. We will connect the theoretical concepts of eigenvalues and eigenvectors from linear algebra to their practical use case in PCA\@.
 
+
+
+\pagebreak
+\tableofcontents
+
+
 \pagebreak
 \section{Preliminaries}
+
+\subsection{Vectors}
+
+You can visualise a column in a dataset as a vector in a high-dimensional space. Each row in the dataset corresponds to a component of the vector, so a dataset with \(n\) observations can be represented as a vector in an \(n\)-dimensional space.
+
+\[
+	\begin{tabular}{|c|c|}
+		\hline
+		$\text{x}$ & $\text{y}$ \\
+		\hline
+		0.41 & 0.36 \\
+		0.24 & 0.09 \\
+		0.77 & 0.66 \\
+		\hline
+	\end{tabular} \rightarrow
+\quad
+	\mathbf{v_x} = \begin{bmatrix}
+		0.41 \\
+		0.24 \\
+		0.77
+	\end{bmatrix}, \quad
+	\mathbf{v_y} = \begin{bmatrix}
+		0.36 \\
+		0.09 \\
+		0.66
+	\end{bmatrix}
+\]
+
+Here, the columns \texttt{x} and \texttt{y} from the dataset are represented as vectors \(\mathbf{v_x}\) and \(\mathbf{v_y}\) in a 3-dimensional space.
+
+
+\subsection{Linear transformations}
+
+A linear transformation takes a vector as input and produces another vector as output, while maintaining the structure of the vector space.
+For example, a linear transformation is represented by a matrix \(A\):
+\[A = \begin{bmatrix}2 & 0 \\ 0 & 3\end{bmatrix}\]
+
+When this matrix transforms the vector \(\mathbf{v} = \begin{bmatrix}1 \\ 1\end{bmatrix}\), the result is:
+\[A\mathbf{v} = 
+		\begin{bmatrix}
+			2 & 0 \\
+			0 & 3
+		\end{bmatrix}
+		\begin{bmatrix}
+			1 \\
+			1
+		\end{bmatrix} =
+		\begin{bmatrix}2 \\
+			3
+		\end{bmatrix}
+\]
+
+This transformation scales the first component of the vector by 2 and the second component by 3.
+
+\subsection{Eigenvectors and Eigenvalues}
+
+An eigenvector is a special type of vector where, when a linear transformation is applied to it, only the scale of the vector changes but not its direction. The eigenvalue is the factor by which the eigenvector scaled.
+
+It is easier explained with a visualiation. In the figure below, the vector $v$ retained the same direction after a linear transformation, unlike the vector $w$. This means that $v$ is an eigenvector and the distance between $v$ and $Av$ is its eigenvalue
+
+The matrix and vectors used in the figure are:
+\[
+	A = \begin{bmatrix}
+		2 & 2 \\
+		-4 & 8
+	\end{bmatrix}, \quad
+	v = \begin{bmatrix}
+		1 \\
+		1
+	\end{bmatrix}, \quad
+	w = \begin{bmatrix}
+		2 \\
+		1
+	\end{bmatrix}
+\]
+
+If we calculate \(Av\) and \(Aw\) we can confirm that the vector \(v\) was simply scaled by a factor of 4, and that \(w\) changed direction.
+
+\[
+	Av = \begin{bmatrix}
+		2 & 2 \\
+		-4 & 8
+	\end{bmatrix}
+	\begin{bmatrix}
+		1 \\
+		1
+	\end{bmatrix} =
+	\begin{bmatrix}
+		4 \\
+		4
+	\end{bmatrix} = 4 \cdot
+	\begin{bmatrix}
+		1 \\
+		1
+	\end{bmatrix}
+\]
+
+\[
+	Aw = \begin{bmatrix}
+		2 & 2 \\
+		-4 & 8
+	\end{bmatrix}
+	\begin{bmatrix}
+		2 \\
+		1
+	\end{bmatrix} =
+	\begin{bmatrix}
+		6 \\
+		0
+	\end{bmatrix}
+\]
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.5\textwidth]{images/eigenvector-visualisation.png}
+	\caption{Visualization of eigenvectors and eigenvalues under a linear transformation~\cite{Libretexts_2023}.}
+\end{figure}
+
+\subsection{Eigen-decomposition}
+Eigen-decomposition is a method used to break down a square matrix into its eigenvalues and eigenvectors. For a square matrix \(A\), the eigen-decomposition can be expressed as:
+\[
+	A = V \Lambda V^{-1}
+\]
+where \(V\) is a matrix whose columns are the eigenvectors of \(A\), and \(\Lambda\) is a diagonal matrix containing the corresponding eigenvalues.
+
+We take the example matrix \(A\) from the previous section:
+\[
+	A = \begin{bmatrix}
+		2 & 2 \\
+		-4 & 8
+	\end{bmatrix}
+\]
+
+
+\underline{For $\lambda = 4$}
+
+\[
+(A - 4I) v = 0 \implies \begin{bmatrix}
+	-2 & 2 \\
+	-4 & 4
+\end{bmatrix}
+\begin{bmatrix}
+	x \\
+	y
+\end{bmatrix} = 0 \implies -2x + 2y = 0 \implies y = x
+\]
+
+\underline{For $\lambda = 6$}
+
+\[
+(A - 6I) v = 0 \implies \begin{bmatrix}
+	-4 & 2 \\
+	-4 & 2
+\end{bmatrix}
+\begin{bmatrix}
+	x \\
+	y
+\end{bmatrix} = 0 \implies -4x + 2y = 0 \implies y = 2x
+\]
+
+So the eigenvectors corresponding to the eigenvalues \(\lambda_1 = 4\) and \(\lambda_2 = 6\) are:
+
+\[
+	v_1 = \begin{bmatrix}
+		1 \\
+		1
+	\end{bmatrix}, \quad
+	v_2 = \begin{bmatrix}
+		1 \\
+		2
+	\end{bmatrix}
+\]
+
+\subsection{Covariance matrix}
+
+Previously we explained that PCA transforms data into a new set of variables, the principal components, which are uncorrelated and ordered by the amount of variance they capture from the original data.
+To find these principal components, PCA uses the eigen-decomposition of the covariance matrix (a measure of how variables in a dataset vary together). 
+
+The covariance matrix \(\Sigma\) is defined as:
+\[
+	\Sigma = \frac{1}{n-1}{(X - \bar{X})}^T(X - \bar{X})
+\]
+where \(X\) is the data matrix and \(\bar{X}\) is the mean vector.
+
 
 % \textbf{Purpose:} Provide the mathematical background required to understand PCA
 
