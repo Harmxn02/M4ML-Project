@@ -124,7 +124,7 @@ If we calculate \(Av\) and \(Aw\) we can confirm that the vector \(v\) was simpl
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.5\textwidth]{images/LINEAR_ALGEBRA/eigenvector-visualisation.png}
+	\includegraphics[width=0.6\textwidth]{images/LINEAR_ALGEBRA/eigenvector-visualisation.png}
 	\caption{Visualization of eigenvectors and eigenvalues under a linear transformation~\cite{Libretexts_2023}.}
 \end{figure}
 
@@ -230,6 +230,31 @@ PCA is not a lossless algorithm, meaning that we do lose some information when w
 
 
 \subsection{Numerical Examples}
+
+In the previous section we mentioned that PCA was not a lossless algorithm. With this we meant that when you remove columns from a dataset, you will end up with a smaller dataset, but also lose a part of it which could have been useful. To further explore this, we will perform PCA on a dataset and show the effects on model performance based on how many principal components we retain.
+
+\subsubsection{Methodology}
+
+We use the `Wine Dataset' from the UC Irvine Machine Learning Repository~\cite{wine_109}. The dataset itself used for the experiment does not matter, since the purpose of this little test is to demonstrate PCA in practice.
+We standardise the dataset, performed PCA, and then used a helper function to train a logistic regression model using the first \(k\) principal components. We evaluate the each of the models using 5-fold cross-validation and record the mean accuracy for each \(k\).
+
+\subsubsection{Findings}
+
+A visualisation of the findings can be found in the figure captioned ``Model performance vs number of retained principal components''. We plot the model performance (mean cross-validated accuracy) against the number of retained principal components.
+This gives us a pretty nice overview of how the model performance changes as we retain more and more (or less and less) principal components.
+The original dataset had 13 features, so when we retain all 13 principal components, we are essentially using the original dataset. As we reduce the number of PCs to just 10, we do not immediately see a significant drop in performance, rather the performance remains relatively stable. However, reducing the number of PCs further does show a significant drop in performance, until we only retain 1 PC which nets us a median accuracy of $0,84$.
+
+This result makes sense if you understand the mathematics behind PCA\@. By retaining the top 10 PCs, we removed 3 dimensions that likely contained less variance, and thus less important data for the model. 
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\textwidth]{images/LINEAR_ALGEBRA/plot-output-lines.png}
+	\caption{Model performance vs number of retained principal components.}
+\end{figure}
+
+
+
+
 
 % \textbf{Purpose:} Provide a small illustrative example to demonstrate PCA in practice.
 
