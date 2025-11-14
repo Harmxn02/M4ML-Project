@@ -14,7 +14,11 @@
 !README.md
 !.gitignore
 !readme-tobias.txt
-!numerical-examples/LA-EEPCA/main.ipynb
+
+# numerical-examples files
+!numerical-examples/
+!numerical-examples/**
+
 
 
 # and just stuff I prefer to keep track of
