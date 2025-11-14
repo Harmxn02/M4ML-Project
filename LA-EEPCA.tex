@@ -71,7 +71,7 @@ It is easier explained with a visualiation. In the figure below, the vector $v$ 
 
 \begin{figure}[H]
 	\centering
-	\fbox{\includegraphics[width=0.6\textwidth]{images/LINEAR_ALGEBRA/eigenvector-visualisation.png}}
+	\fbox{\includegraphics[width=0.6\textwidth]{images/linear-algebra/eigenvector-visualisation.png}}
 	\caption{Visualization of eigenvectors and eigenvalues under a linear transformation~\cite{Libretexts_2023}.}
 \end{figure}
 
@@ -248,13 +248,13 @@ This gives us a pretty nice overview of how the model performance changes as we 
 
 The original dataset had 13 features, so when we retain all 13 principal components, we are essentially using the original dataset. As we reduce the number of PCs to just 10, we do not immediately see a significant drop in performance, rather the performance remains relatively stable. However, reducing the number of PCs further does show a significant drop in performance, until we only retain 1 PC which nets us a median accuracy of $0,84$.
 
-This result makes sense if you understand the mathematics behind PCA\@. By retaining the top 10 PCs, we removed 3 dimensions that likely contained less variance, and thus less important data for the model. 
+This result makes sense if you understand the mathematics behind PCA\@. By retaining the top 10 PCs, we removed 3 features that contained less variance, and thus less important data for the model.
 
 The code used for this experiment is publicly available in the project repository hosted on GitHub at Harmxn02/M4ML-Project~\cite{Harmxn}.
 
 \begin{figure}[H]
 	\centering
-	\fbox{\includegraphics[width=0.8\textwidth]{images/LINEAR_ALGEBRA/plot-output-lines.png}}
+	\fbox{\includegraphics[width=0.8\textwidth]{images/linear-algebra/plot-output-lines.png}}
 	\caption{Model performance vs number of retained principal components.}
 \end{figure}
 
