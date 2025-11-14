@@ -69,6 +69,13 @@ An eigenvector is a special type of vector where, when a linear transformation i
 
 It is easier explained with a visualiation. In the figure below, the vector $v$ retained the same direction after a linear transformation, unlike the vector $w$. This means that $v$ is an eigenvector and the distance between $v$ and $Av$ is its eigenvalue
 
+\begin{figure}[H]
+	\centering
+	\fbox{\includegraphics[width=0.6\textwidth]{images/LINEAR_ALGEBRA/eigenvector-visualisation.png}}
+	\caption{Visualization of eigenvectors and eigenvalues under a linear transformation~\cite{Libretexts_2023}.}
+\end{figure}
+
+
 The matrix and vectors used in the figure are:
 \[
 	A = \begin{bmatrix}
@@ -120,13 +127,6 @@ If we calculate \(Av\) and \(Aw\) we can confirm that the vector \(v\) was simpl
 		0
 	\end{bmatrix}
 \]
-
-
-\begin{figure}
-	\centering
-	\includegraphics[width=0.6\textwidth]{images/LINEAR_ALGEBRA/eigenvector-visualisation.png}
-	\caption{Visualization of eigenvectors and eigenvalues under a linear transformation~\cite{Libretexts_2023}.}
-\end{figure}
 
 \subsubsection{Eigen-decomposition}
 Eigen-decomposition is a method used to break down a square matrix into its eigenvalues and eigenvectors. For a square matrix \(A\), the eigen-decomposition can be expressed as:
@@ -236,21 +236,25 @@ In the previous section we mentioned that PCA was not a lossless algorithm. With
 \subsubsection{Methodology}
 
 We use the `Wine Dataset' from the UC Irvine Machine Learning Repository~\cite{wine_109}. The dataset itself used for the experiment does not matter, since the purpose of this little test is to demonstrate PCA in practice.
-We standardise the dataset, performed PCA, and then used a helper function to train a logistic regression model using the first \(k\) principal components. We evaluate the each of the models using 5-fold cross-validation and record the mean accuracy for each \(k\).
+We standardise the dataset, perform PCA, and then use a helper function to train a logistic regression model using the first \(k\) principal components. We evaluate the each of the models using 5-fold cross-validation and record the mean accuracy for each \(k\).
+
+The sklearn library in Python was implemented to standarise the data, perform PCA, train and evaluate the models~\cite{sklearn_api}. Visualisations were made with matplotlib~\cite{Hunter:2007} and seaborn~\cite{Waskom2021}.
 
 \subsubsection{Findings}
 
 A visualisation of the findings can be found in the figure captioned ``Model performance vs number of retained principal components''. We plot the model performance (mean cross-validated accuracy) against the number of retained principal components.
+
 This gives us a pretty nice overview of how the model performance changes as we retain more and more (or less and less) principal components.
+
 The original dataset had 13 features, so when we retain all 13 principal components, we are essentially using the original dataset. As we reduce the number of PCs to just 10, we do not immediately see a significant drop in performance, rather the performance remains relatively stable. However, reducing the number of PCs further does show a significant drop in performance, until we only retain 1 PC which nets us a median accuracy of $0,84$.
 
 This result makes sense if you understand the mathematics behind PCA\@. By retaining the top 10 PCs, we removed 3 dimensions that likely contained less variance, and thus less important data for the model. 
 
 The code used for this experiment is publicly available in the project repository hosted on GitHub at Harmxn02/M4ML-Project~\cite{Harmxn}.
 
-\begin{figure}
+\begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{images/LINEAR_ALGEBRA/plot-output-lines.png}
+	\fbox{\includegraphics[width=0.8\textwidth]{images/LINEAR_ALGEBRA/plot-output-lines.png}}
 	\caption{Model performance vs number of retained principal components.}
 \end{figure}
 
