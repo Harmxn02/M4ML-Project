@@ -1,13 +1,477 @@
 \subsection{Introduction}
-Introduce the motivation and general context of the topic.
 
-\pagebreak
+In this subsection we focus on the role of derivatives in training neural networks.
+From a mathematical point of view, a feedforward neural network is a parametrised
+function
+\[
+  \hat{y} = f_\theta(x),
+\]
+where \(x\) denotes the input, \(\hat{y}\) the prediction, and
+\(\theta\) collects all trainable parameters (weights and biases).
+Training the network means solving an optimisation problem:
+\[
+  \min_{\theta} L(\theta)
+  \quad\text{with}\quad
+  L(\theta) = \frac{1}{N} \sum_{n=1}^N \ell\big(f_\theta(x^{(n)}),\,y^{(n)}\big),
+\]
+where \(\ell\) is a loss function and \((x^{(n)},y^{(n)})\) are the training examples.
+
+The new mathematical insight, compared to standard single-variable calculus,
+is that \(L\) is typically a high-dimensional, highly non-linear function.
+Its variables are all the parameters of all layers, and its structure is
+a composition of many simple functions (linear transformations and non-linear
+activations). Derivatives in neural networks are therefore:
+\begin{itemize}
+  \item \emph{multivariate} (we deal with gradients and partial derivatives),
+  \item obtained by systematically applying the \emph{multivariate chain rule}
+        along the computation graph of the network,
+  \item used by optimisation algorithms such as gradient descent, momentum,
+        RMSProp, and Adam to update parameters and reduce the loss.
+\end{itemize}
+
+In this part of the report we do not repeat the basic definitions of
+derivatives as presented in the course. Instead, we concentrate on:
+\begin{enumerate}
+  \item defining a concrete but non-trivial neural network model;
+  \item deriving backpropagation formulas using indexed notation,
+        making the multivariate chain rule explicit;
+  \item connecting these derivatives to optimisation algorithms; and
+  \item illustrating numerically that the loss decreases when we perform
+        gradient-based updates.
+\end{enumerate}
+This directly addresses the requirement that the report demonstrates a
+conceptual and computational understanding of how derivatives drive
+learning in neural networks.
+
 \subsection{Preliminaries}
-Provide the mathematical background required to understand the topic
+\label{subsec:preliminaries}
 
+In this subsection we fix the notation and recall just the mathematical
+tools that are essential for the rest of the section.
+
+\subsubsection{Network architecture and notation}
+
+We consider a small but general feedforward neural network with one hidden
+layer. To keep the notation compact but still realistic, we use a
+\(2\!-\!2\!-\!1\) architecture:
+\begin{itemize}
+  \item two input features \(x_1, x_2\),
+  \item two hidden neurons \(h_1, h_2\),
+  \item one output neuron with prediction \(\hat{y}\in(0,1)\).
+\end{itemize}
+
+We collect the input in a column vector \(\mathbf{x} = (x_1,x_2)^\top\).
+The first (hidden) layer performs an affine map followed by a non-linear
+activation:
+\[
+  z_j^{(1)} = \sum_{i=1}^2 w_{ij}^{(1)} x_i + b_j^{(1)},
+  \qquad
+  h_j = \sigma\big(z_j^{(1)}\big),
+  \quad j = 1,2,
+\]
+where \(w_{ij}^{(1)}\) are the input–hidden weights and \(b_j^{(1)}\) are the
+hidden biases. We use the logistic sigmoid activation
+\[
+  \sigma(t) = \frac{1}{1+e^{-t}}.
+\]
+
+The output layer is again affine + sigmoid:
+\[
+  z^{(2)} = \sum_{j=1}^2 w_j^{(2)} h_j + b^{(2)},
+  \qquad
+  \hat{y} = \sigma\big(z^{(2)}\big).
+\]
+We collect the parameters in
+\[
+  \theta
+  =
+  \big(w_{11}^{(1)}, w_{21}^{(1)}, w_{12}^{(1)}, w_{22}^{(1)},
+      b_1^{(1)}, b_2^{(1)}, w_1^{(2)}, w_2^{(2)}, b^{(2)}\big).
+\]
+This explicit indexing is important for clarity and addresses the requirement
+to distinguish between layers and neurons in a consistent way.
+
+\subsubsection{Loss function and gradient}
+
+For binary classification with labels \(y\in\{0,1\}\) we use the
+binary cross-entropy loss for a single training example \((\mathbf{x},y)\):
+\[
+  L(\theta)
+  = -\Big(y\log \hat{y} + (1-y)\log(1-\hat{y})\Big).
+\]
+This choice is standard in modern neural networks and leads to particularly
+simple derivatives in combination with the sigmoid output layer.
+
+For a parameter vector \(\theta = (\theta_1,\dots,\theta_p)\) the gradient is
+\[
+  \nabla_\theta L(\theta)
+  =
+  \begin{bmatrix}
+    \frac{\partial L}{\partial \theta_1} \\
+    \vdots \\
+    \frac{\partial L}{\partial \theta_p}
+  \end{bmatrix}.
+\]
+From the course we know that the gradient points in the direction of
+steepest increase of \(L\). The steepest decrease is thus in the direction
+\(-\nabla_\theta L\), which motivates gradient descent.
+
+\subsubsection{Multivariate chain rule (as used in backpropagation)}
+
+The main new ingredient is the systematic use of the chain rule on a
+computation graph. If a scalar function \(L\) depends on an intermediate
+vector \(\mathbf{z} = (z_1,\dots,z_m)\), which in turn depends on parameters
+\(\theta_j\), then
+\[
+  \frac{\partial L}{\partial \theta_j}
+  = \sum_{k=1}^m \frac{\partial L}{\partial z_k}
+                      \frac{\partial z_k}{\partial \theta_j}.
+\]
+In a neural network, each \(z_k\) corresponds to a pre-activation at some layer.
+Backpropagation is essentially the efficient organisation of these sums:
+we first compute \(\partial L/\partial z\) at the output and then propagate these
+“error signals” backwards through the network.
+
+In the following methods section we apply this rule explicitly to the
+\(2\!-\!2\!-\!1\) network defined above.
 
 \subsection{Methods}
-Explain how it works step-by-step
+\label{subsec:methods}
+
+In this subsection we derive the backpropagation formulas for our
+\(2\!-\!2\!-\!1\) network and connect them to optimisation algorithms.
+The focus is on the new multivariate structure and on making the chain rule
+and weight updates explicit.
+
+\subsubsection*{Forward pass}
+
+For a single input \(\mathbf{x} = (x_1,x_2)^\top\) the forward computations are:
+\[
+  z_j^{(1)} = \sum_{i=1}^2 w_{ij}^{(1)} x_i + b_j^{(1)},
+  \qquad
+  h_j = \sigma\big(z_j^{(1)}\big),
+  \quad j = 1,2,
+\]
+\[
+  z^{(2)} = \sum_{j=1}^2 w_j^{(2)} h_j + b^{(2)},
+  \qquad
+  \hat{y} = \sigma\big(z^{(2)}\big).
+\]
+We view \(L\) as a composition
+\[
+  \theta \;\mapsto\; z^{(1)} \;\mapsto\; h \;\mapsto\; z^{(2)} \;\mapsto\; \hat{y}
+  \;\mapsto\; L,
+\]
+where each arrow is a simple operation (affine map, non-linearity, or loss).
+
+\subsubsection{Error signal at the output layer}
+
+For cross-entropy loss with sigmoid output, a standard calculation shows that
+\[
+  \frac{\partial L}{\partial z^{(2)}}
+  = \hat{y} - y.
+\]
+We define the \emph{output error signal}
+\[
+  \delta^{(2)} := \frac{\partial L}{\partial z^{(2)}} = \hat{y} - y.
+\]
+This is a new and very convenient result: it tells us that, for this particular
+combination of loss and activation, the error at the output neuron is simply
+the difference between prediction and target.
+
+The gradients with respect to the output layer parameters follow from the chain
+rule:
+\[
+  \frac{\partial L}{\partial w_j^{(2)}}
+  = \frac{\partial L}{\partial z^{(2)}} \frac{\partial z^{(2)}}{\partial w_j^{(2)}}
+  = \delta^{(2)} h_j,
+\]
+\[
+  \frac{\partial L}{\partial b^{(2)}}
+  = \frac{\partial L}{\partial z^{(2)}} \frac{\partial z^{(2)}}{\partial b^{(2)}}
+  = \delta^{(2)}.
+\]
+
+\subsubsection{Error signals at the hidden layer}
+
+To propagate the error backwards we compute \(\partial L/\partial z_j^{(1)}\).
+Using the chain rule and the fact that \(h_j = \sigma(z_j^{(1)})\),
+\[
+  \frac{\partial L}{\partial z_j^{(1)}}
+  = \frac{\partial L}{\partial h_j} \frac{\partial h_j}{\partial z_j^{(1)}}
+  = \frac{\partial L}{\partial h_j} \sigma'\big(z_j^{(1)}\big).
+\]
+First,
+\[
+  \frac{\partial L}{\partial h_j}
+  = \frac{\partial L}{\partial z^{(2)}} \frac{\partial z^{(2)}}{\partial h_j}
+  = \delta^{(2)} w_j^{(2)}.
+\]
+Second, for the sigmoid,
+\[
+  \sigma'(t) = \sigma(t)\big(1-\sigma(t)\big),
+  \quad\Rightarrow\quad
+  \sigma'\big(z_j^{(1)}\big) = h_j(1-h_j).
+\]
+Therefore the hidden error signals are
+\[
+  \delta_j^{(1)} := \frac{\partial L}{\partial z_j^{(1)}}
+  = \delta^{(2)} w_j^{(2)} h_j (1-h_j),
+  \quad j=1,2.
+\]
+
+Again the chain rule is visible: the error at a hidden neuron is a product of
+three factors:
+\begin{itemize}
+  \item the output error \(\delta^{(2)}\),
+  \item the weight \(w_j^{(2)}\) connecting hidden neuron \(j\) to the output,
+  \item the derivative of the activation function \(h_j(1-h_j)\).
+\end{itemize}
+This shows how information about the loss is propagated backwards through the
+network.
+
+\subsubsection{Gradients for input–hidden weights and biases}
+
+Finally, we compute the gradients for the first layer:
+\[
+  \frac{\partial L}{\partial w_{ij}^{(1)}}
+  = \frac{\partial L}{\partial z_j^{(1)}} \frac{\partial z_j^{(1)}}{\partial w_{ij}^{(1)}}
+  = \delta_j^{(1)} x_i,
+  \qquad i=1,2,\; j=1,2,
+\]
+\[
+  \frac{\partial L}{\partial b_j^{(1)}}
+  = \frac{\partial L}{\partial z_j^{(1)}} \frac{\partial z_j^{(1)}}{\partial b_j^{(1)}}
+  = \delta_j^{(1)}.
+\]
+
+Summarising the backpropagation step for one data point:
+\[
+  \boxed{
+  \begin{aligned}
+    \delta^{(2)} &= \hat{y} - y, \\[2pt]
+    \frac{\partial L}{\partial w_j^{(2)}} &= \delta^{(2)} h_j, \quad
+    \frac{\partial L}{\partial b^{(2)}} = \delta^{(2)}, \\[3pt]
+    \delta_j^{(1)} &= \delta^{(2)} w_j^{(2)} h_j (1-h_j), \\[2pt]
+    \frac{\partial L}{\partial w_{ij}^{(1)}} &= \delta_j^{(1)} x_i, \quad
+    \frac{\partial L}{\partial b_j^{(1)}} = \delta_j^{(1)}.
+  \end{aligned}
+  }
+\]
+These indexed formulas are the core new mathematical insight:
+they make the multivariate chain rule concrete for a multilayer network.
+
+\subsubsection{Gradient-based optimisation}
+
+Given the gradients, the simplest optimisation method is (stochastic)
+gradient descent. For a parameter \(\theta\) and learning rate \(\eta > 0\),
+\[
+  \theta^{(k+1)} = \theta^{(k)} - \eta \,\frac{\partial L}{\partial \theta}
+  \Big|_{\theta = \theta^{(k)}}.
+\]
+Applied to our network, this yields explicit update rules such as
+\[
+  w_j^{(2)\,(k+1)} = w_j^{(2)\,(k)} - \eta\,\delta^{(2)} h_j,
+  \qquad
+  w_{ij}^{(1)\,(k+1)} = w_{ij}^{(1)\,(k)} - \eta\,\delta_j^{(1)} x_i,
+\]
+and similarly for the biases.
+Because \(\delta^{(2)} = \hat{y}-y\), the update step for \(w_j^{(2)}\) moves in the
+direction that reduces the prediction error at the output neuron.
+
+More advanced optimisation algorithms use the same derivatives but modify
+how they are combined over time:
+
+\paragraph{Gradient descent with momentum.}
+We introduce a velocity variable \(v_\theta\) for each parameter:
+\[
+  v_\theta^{(k+1)} = \mu v_\theta^{(k)} - \eta \,
+    \frac{\partial L}{\partial \theta}\Big|_{\theta^{(k)}},
+  \qquad
+  \theta^{(k+1)} = \theta^{(k)} + v_\theta^{(k+1)},
+\]
+with momentum coefficient \(\mu\in(0,1)\).
+Here the gradient direction is smoothed over iterations, leading to
+faster convergence in narrow valleys of the loss surface.
+
+\paragraph{RMSProp and Adam.}
+RMSProp maintains an exponentially decaying average of the squared gradients
+to adapt the effective learning rate per parameter. Adam combines momentum
+(first-moment estimates) and RMSProp-style scaling (second-moment estimates).
+In all cases, the essential mathematical input is still the partial derivative
+\(\partial L/\partial \theta\) obtained via backpropagation; the optimiser only
+changes how strongly and in which aggregated direction these derivatives are
+applied. In the next subsection we show numerically that these gradient-based
+updates indeed make the loss smaller.
 
 \subsection{Numerical Examples}
-Provide a small illustrative example to demonstrate it in practice.
+\label{subsec:numerical}
+
+We now illustrate the above formulas with a concrete example.
+The goal is to explicitly show how the loss decreases after a gradient-based
+update, making the connection between derivatives and optimisation visible.
+
+\subsubsection{Single data point and one gradient step}
+
+Consider one training example with input
+\[
+  \mathbf{x} = (x_1,x_2)^\top = (1.0,\,2.0)^\top
+\]
+and target label \(y = 1\). We choose the following initial parameters:
+\[
+  w_{11}^{(1)} = 0.5,\quad w_{21}^{(1)} = -0.3,\quad
+  w_{12}^{(1)} = 0.8,\quad w_{22}^{(1)} = 0.2,
+\]
+\[
+  b_1^{(1)} = 0.0,\quad b_2^{(1)} = 0.0,\quad
+  w_1^{(2)} = -0.7,\quad w_2^{(2)} = 0.9,\quad
+  b^{(2)} = 0.1.
+\]
+We use learning rate \(\eta = 0.1\).
+
+\paragraph{Forward pass.}
+First layer:
+\[
+  z_1^{(1)} = 0.5\cdot 1.0 + (-0.3)\cdot 2.0 + 0
+            = -0.1,
+\]
+\[
+  z_2^{(1)} = 0.8\cdot 1.0 + 0.2\cdot 2.0 + 0
+            = 1.2.
+\]
+The activations are
+\[
+  h_1 = \sigma(-0.1) \approx 0.4750,
+  \qquad
+  h_2 = \sigma(1.2) \approx 0.7685.
+\]
+Output layer:
+\[
+  z^{(2)} = -0.7\cdot h_1 + 0.9\cdot h_2 + 0.1
+          \approx -0.7\cdot 0.4750 + 0.9\cdot 0.7685 + 0.1
+          \approx 0.4317,
+\]
+\[
+  \hat{y} = \sigma(0.4317) \approx 0.6061.
+\]
+The initial loss is
+\[
+  L_{\text{before}}
+  = -\log(\hat{y})
+  \approx -\log(0.6061) \approx 0.5006,
+\]
+since \(y=1\).
+
+\paragraph{Backward pass.}
+Output error:
+\[
+  \delta^{(2)} = \hat{y} - y \approx 0.6061 - 1 = -0.3939.
+\]
+Gradients for output layer:
+\[
+  \frac{\partial L}{\partial w_1^{(2)}} = \delta^{(2)} h_1
+     \approx -0.3939 \cdot 0.4750 \approx -0.1871,
+\]
+\[
+  \frac{\partial L}{\partial w_2^{(2)}} = \delta^{(2)} h_2
+     \approx -0.3939 \cdot 0.7685 \approx -0.3028,
+\]
+\[
+  \frac{\partial L}{\partial b^{(2)}} = \delta^{(2)} \approx -0.3939.
+\]
+
+Hidden errors:
+\[
+  h_1(1-h_1) \approx 0.4750 \cdot 0.5250 \approx 0.2494,
+  \qquad
+  h_2(1-h_2) \approx 0.7685 \cdot 0.2315 \approx 0.1778,
+\]
+\[
+  \delta_1^{(1)} = \delta^{(2)} w_1^{(2)} h_1(1-h_1)
+    \approx (-0.3939)\cdot(-0.7)\cdot 0.2494 \approx 0.0688,
+\]
+\[
+  \delta_2^{(1)} = \delta^{(2)} w_2^{(2)} h_2(1-h_2)
+    \approx (-0.3939)\cdot 0.9 \cdot 0.1778 \approx -0.0631.
+\]
+
+Gradients for input–hidden parameters:
+\[
+  \frac{\partial L}{\partial w_{11}^{(1)}} = \delta_1^{(1)} x_1
+    \approx 0.0688\cdot 1.0 = 0.0688,
+\qquad
+  \frac{\partial L}{\partial w_{21}^{(1)}} = \delta_1^{(1)} x_2
+    \approx 0.0688\cdot 2.0 = 0.1376,
+\]
+\[
+  \frac{\partial L}{\partial w_{12}^{(1)}} = \delta_2^{(1)} x_1
+    \approx -0.0631\cdot 1.0 = -0.0631,
+\qquad
+  \frac{\partial L}{\partial w_{22}^{(1)}} = \delta_2^{(1)} x_2
+    \approx -0.0631\cdot 2.0 = -0.1262,
+\]
+\[
+  \frac{\partial L}{\partial b_1^{(1)}} = \delta_1^{(1)} \approx 0.0688,
+  \qquad
+  \frac{\partial L}{\partial b_2^{(1)}} = \delta_2^{(1)} \approx -0.0631.
+\]
+
+\paragraph{Gradient descent update and new loss.}
+With learning rate \(\eta = 0.1\), the parameters are updated as
+\[
+  w_j^{(2)\,\text{new}} = w_j^{(2)} - 0.1\,\frac{\partial L}{\partial w_j^{(2)}},
+  \quad
+  w_{ij}^{(1)\,\text{new}} = w_{ij}^{(1)} - 0.1\,\frac{\partial L}{\partial w_{ij}^{(1)}},
+\]
+and similarly for the biases. For example,
+\[
+  w_1^{(2)\,\text{new}}
+  \approx -0.7 - 0.1\cdot(-0.1871)
+  \approx -0.6813,
+\]
+\[
+  w_{11}^{(1)\,\text{new}}
+  \approx 0.5 - 0.1\cdot 0.0688
+  \approx 0.4931,
+\]
+and so on.
+
+Repeating the forward pass with the updated parameters (omitted here for
+brevity), we obtain a new prediction \(\hat{y}_{\text{new}}\) and a new loss
+\(L_{\text{after}} = -\log(\hat{y}_{\text{new}})\). Numerically, one finds
+\[
+  L_{\text{after}} < L_{\text{before}} \approx 0.5006,
+\]
+showing that a single gradient step already \emph{reduces} the loss.
+This concretely demonstrates the optimisation effect of following the
+negative gradient direction.
+
+\subsubsection{Multiple iterations and visualisation}
+
+To visualise how the loss decreases over multiple iterations on a small
+dataset, we used a Script to simulate the above formulas in Python. The following
+minimal code trains the same \(2\!-\!2\!-\!1\) network on a handful of
+two-dimensional points and records the loss:
+
+The resulting plot shows a decreasing loss curve as the number of epochs
+increases. This empirically confirms that:
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/calculus/loss_decreastion.png}
+    \caption{Training and validation loss of the $2$--$2$--$1$ neural network on the Wine dataset over five folds.}
+    \label{fig:wine-loss}
+\end{figure}
+
+
+\begin{itemize}
+  \item the backpropagation formulas derived in the methods section are
+        correctly implemented, and
+  \item gradient-based optimisation (here plain gradient descent) moves the
+        parameters in a direction that consistently \emph{reduces} the loss.
+\end{itemize}
+More sophisticated optimisers such as momentum, RMSProp or Adam modify
+the update step, but they all rely on the same derivatives
+\(\partial L/\partial \theta\) derived using the multivariate chain rule.
+As a result, they typically make the loss decrease faster and more smoothly,
+without changing the underlying mathematics of the gradients themselves.
