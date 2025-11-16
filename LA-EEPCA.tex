@@ -242,8 +242,7 @@ The sklearn library in Python was implemented to standarise the data, perform PC
 
 \subsubsection{Findings}
 
-A visualisation of the findings can be found in the figure captioned ``Model performance vs number of retained principal components''. We plot the model performance (mean cross-validated accuracy) against the number of retained principal components.
-
+A visualisation of the findings can be found in the figure below. We plot the model performance (mean cross-validated accuracy) against the number of retained principal components. 
 This gives us a pretty nice overview of how the model performance changes as we retain more and more (or less and less) principal components.
 
 The original dataset had 13 features, so when we retain all 13 principal components, we are essentially using the original dataset. As we reduce the number of PCs to just 10, we do not immediately see a significant drop in performance, rather the performance remains relatively stable. However, reducing the number of PCs further does show a significant drop in performance, until we only retain 1 PC which nets us a median accuracy of $0,84$.
