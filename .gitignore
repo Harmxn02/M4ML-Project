@@ -13,7 +13,6 @@
 # Don't these files specifically
 !README.md
 !.gitignore
-!readme-tobias.txt
 
 # numerical-examples files
 !numerical-examples/
